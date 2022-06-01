@@ -1,0 +1,96 @@
+---
+title: "FoodJustice"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    social: menu
+    source_code: embed
+    theme: paper
+runtime: shiny
+---
+
+```{r global, include=FALSE}
+# load data in 'global' chunk so it can be shared by all users of the dashboard
+library(ggplot2)
+library(mgcv)
+library(shiny)
+library(flexdashboard)
+library(tidyverse)
+library(here)
+options(scipen = 99)
+
+
+```
+
+
+
+
+```{r}
+dataset  <- read_csv(here("data/chr_pressures_by_food_type.csv")) 
+```
+
+
+```{r}
+dataset <- dataset %>% 
+  select(sum_cumulative_pressure, per_low_birthweight, per_freq_physical_distress, per_freq_mental_distress, life_expectancy, per_adult_obesity, region, Backyard.Pig.Meat, Cereals.and.Grains, Chickens...Pigs.Livestock.Meat, Eggs, Freshwater.Fishery, Fruits.and.Vegetables, Mariculture, Mariculture.Feed, Marine.Fishery, Milk,
+Oil.Crops.and.Seeds, Pulses.and.Beans, Rice, Ruminants.Livestock.Meat, Soy, Spices, Starches, Starches.and.Roots, Sugar, Tree.Nuts, Livestock.Feed, per_rural, median_household_income, drinking_water_violation, state.x, per_black, per_am_indian_alaska_native, per_asian, per_nativeHA_other_pacific_isl, per_hispanic, per_non_hispanic_white, division, fips, per_uninsured, per_access_to_exercise, primary_care_phys_quartile, mental_health_providers_quartile, per_child_poverty, air_pollution_avg_daily_pm2.5, per_severe_house_cost_burden, per_severe_housing_problems, per_food_insecure, per_limited_access_healthy_food, per_smokers, per_physically_inactive, per_excessive_drinking, per_flu_vaccinated, per_completed_hs, per_some_college, traffic_volume)
+
+
+
+dataset <- dataset %>% 
+  drop_na()
+```
+
+
+
+
+
+
+
+Inputs {.sidebar}
+-----------------------------------------------------------------------
+
+```{r}
+
+
+
+checkboxInput('jitter', 'Jitter', value = TRUE)
+checkboxInput('smooth', 'Smooth', value = FALSE)
+
+selectInput('x', 'X', names(dataset))
+selectInput('y', 'Y', names(dataset), names(dataset)[[2]])
+selectInput('color', 'Color', c('None', names(dataset)))
+
+selectInput('facet_row', 'Facet Row',
+c(None='.', names(dataset)))
+selectInput('facet_col', 'Facet Column',
+c(None='.', names(dataset)))
+```
+
+Outputs
+-----------------------------------------------------------------------
+
+### Data
+
+```{r}
+
+renderPlot({
+  p <- ggplot(data = dataset, aes_string(x=input$x, y=input$y)) + geom_point()
+  
+  if (input$color != 'None')
+    p <- p + aes_string(color=input$color)
+  
+  facets <- paste(input$facet_row, '~', input$facet_col)
+  if (facets != '. ~ .')
+    p <- p + facet_grid(facets)
+  
+  if (input$jitter)
+    p <- p + geom_jitter()
+  if (input$smooth)
+    p <- p + geom_smooth()
+  
+  print(p)
+})
+```
+
+
