@@ -26,8 +26,6 @@ options(scipen = 99)
 
 
 ```{r}
-
-
 dataset  <- read_csv(here("data/chr_pressures_by_food_type.csv")) 
 ```
 
