@@ -6,7 +6,7 @@ output:
     social: menu
     source_code: embed
     theme: paper
-runtime: shiny
+
 ---
 
 ```{r global, include=FALSE}
